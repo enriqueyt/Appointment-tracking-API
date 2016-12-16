@@ -6,16 +6,16 @@ var distributionLine = mongoose.model('distributionLine');
 var Promise = require('promise');
 
 router
-	.route('/:user_id')
+	.route('/:client_id')
 	.get(function(req, res, next){
 
-		client.findById(req.params.user_id, callback);
+		client.findById(req.params.client_id, callback);
 
 		function callback(err, doc){
 			if(err)
 				return res.json({error:true,message:err});
 			if(!doc)
-				return res.json({error:false, result:'User no found'});
+				return res.json({error:false, result:'client no found'});
 			else
 				return res.json({error:false, result:doc});	
 		};
@@ -43,7 +43,7 @@ router
 		};
 	})
 	.put(function(req, res, next){
-		var query = { _id : req.params.user_id},
+		var query = { _id : req.params.client_id},
 			update = {
 				updateAt:Date.now
 			},
@@ -70,7 +70,7 @@ router
 		};
 	})
 	.delete(function(req, res, next){
-		var query = { _id : req.params.user_id };
+		var query = { _id : req.params.client_id };
 
 		client.remove(query, callback);
 

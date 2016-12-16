@@ -17,13 +17,13 @@ module.exports = function(passport){
 	};
 
 	passport.serializeUser(function(user, done){
-		console.log('usuairo sealizado: ' + user.username );
+		console.log('usuario sealizado: ' + user.username );
 		done(null, user._id);
 	});
 
 	passport.deserializeUser(function(id, done){
 		user.findById(id, function(err, doc){
-			onsole.log('deserializeUser: ' + doc.username );
+			onsole.log('deserialize User: ' + doc.username );
 			done(err, doc);
 		});		
 	});
@@ -200,7 +200,7 @@ module.exports = function(passport){
 
 	router
 		.get('/userByDl', function(req, res, next){
-			var query = {};
+			var query = {_id : req.params._id};
 
 			user
 				.find(query)
