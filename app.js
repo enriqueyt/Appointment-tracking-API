@@ -46,7 +46,9 @@ app.use(function(req, res, next){
 });
 
 app.use(passport.initialize());
-app.use(passport.session());
+app.use(passport.session({
+  secret : 'holis'
+}));
 
 app.use('/', routes);
 app.use('/auth', authenticate);

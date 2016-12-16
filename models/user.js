@@ -13,7 +13,7 @@ var user = new Schema({
 		type : String,
 		required : true
 	},
-	email {
+	email :{
 		type : String
 	},
 	admin : {

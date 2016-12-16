@@ -6,30 +6,32 @@ var distributionLine = mongoose.model('distributionLine');
 var LocalStrategy = require('passport-local').Strategy;
 var bCrypt = require('bcrypt-nodejs');
 
+var users = {};
+
 module.exports = function(passport){
 
-	var isValidPassword = function(doc, password){
-		return bCrypt.compareSync(password, doc.username);
+	var isValidPassword = function(doc, password){		
+		return bCrypt.compareSync(password, doc.password);
 	};
 
 	var createHash = function(password){
-		return bCrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+		return bCrypt.hashSync(password, bCrypt.genSaltSync(10), null);
 	};
 
 	passport.serializeUser(function(user, done){
-		console.log('usuario sealizado: ' + user.username );
-		done(null, user._id);
+		console.log('usuario serializado: ' + user.username );
+		return done(null, user);
 	});
 
 	passport.deserializeUser(function(id, done){
 		user.findById(id, function(err, doc){
-			onsole.log('deserialize User: ' + doc.username );
-			done(err, doc);
+			console.log('deserialize User: ' + doc.username );
+			return done(err, doc);
 		});		
 	});
 
 	passport.use('login', new LocalStrategy({
-		passReqToCallback : true	
+		passReqToCallback : true
 	}, function(req, username, password, done){
 
 		var query = {'username': username};
@@ -38,29 +40,27 @@ module.exports = function(passport){
 			.findOne(query, function(err, doc){
 
 				if(err)
-					return done(null);
+					return done(false);
 
 				if(!doc){
 					console.log('no existe el usuario');
-					return done(null, false);
+					return done(true, false, {message:'no existe el usuario'});
 				}
 
 				if(!isValidPassword(doc, password)){
-					console.log('password is false');
-					return done(null, false);
-				}
+					console.log('password errado!');
+					return done(true, false, {message:'password errado!'});
+				}	
 
-				req.session.isLoggedIn = true;
-				req.session.user = username;	
-
-				return done(null, doc);
+				return done(false, doc);
 
 			});
 	}));
 
 	passport.use('signup', new LocalStrategy({
+		passReqToCallback : true
 	}, function(req, username, password, done){
-
+				
 		var query = {'username': username};
 
 		user
@@ -68,30 +68,35 @@ module.exports = function(passport){
 
 				if(err){
 					console.log('error')
-					return done(err);
+					return done(true, null, 'error')
 				}
 
-				if(user){
+				if(doc){
 					console.log('User already exists')
-					return 
+					return done(true, null, 'User already exists')
 				}else{
 
 					var newUser = new user();
 
 					newUser.username = username;
-					newUser.password = createHash(password);
-					newUser.distributorLine = req.params.distributorLine;
-					newUser.location = req.params.location;
-					if(req.params.admin)
+					newUser.password = createHash(password);					
+					newUser.email = req.body.email;
+
+					if(typeof req.params.admin != 'undefined')
 						newUser.admin = req.params.admin;
+
+					if(typeof req.body.distributorLine != 'undefined')
+						newUser.distributorLine = req.body.distributorLine;
+
+					if(typeof req.body.location != 'undefined')
+						newUser.location = req.body.location;
 
 					newUser.save(function(err){
 						if(err){
-							console.log('error guardando');
-							throw err;
+							done(true, null, 'error guardando');
 						}
-						console.log(newUser.username + ' Registro satisfactorio');
-						return done(null, newUser);
+						
+						return done(false, newUser, 'Registro satisfactorio');
 					});
 
 				}

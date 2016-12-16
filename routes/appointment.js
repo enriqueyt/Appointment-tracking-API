@@ -89,7 +89,7 @@ router
 		};
 	});
 
-route
+router
 	.put('/reassignedAppointment/:id/:newDate', function(req, res){
 		var query = {
 				_id : req.params.id
@@ -112,7 +112,10 @@ route
 router
 	.get('/list/:by/:value', function(req, res, next){
 
-		var query = { req.params.by : req.params.value }
+		var aux = req.params.by;
+		var query = { 
+			aux : req.params.value 
+		};
 
 		appointment.find(query, function(err, doc){
 			if(err)
