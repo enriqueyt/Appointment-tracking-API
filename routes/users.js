@@ -40,7 +40,7 @@ module.exports = function(passport){
 			.findOne(query, function(err, doc){
 
 				if(err)
-					return done(false);
+					return done(true, false, {message:err});
 
 				if(!doc){
 					console.log('no existe el usuario');
@@ -52,7 +52,7 @@ module.exports = function(passport){
 					return done(true, false, {message:'password errado!'});
 				}	
 
-				return done(false, doc);
+				done(false, doc);
 
 			});
 	}));
@@ -93,10 +93,10 @@ module.exports = function(passport){
 
 					newUser.save(function(err){
 						if(err){
-							done(true, null, 'error guardando');
+							done(true, null, 'Error saved');
 						}
 						
-						return done(false, newUser, 'Registro satisfactorio');
+						return done(false, newUser, 'Success');
 					});
 
 				}
