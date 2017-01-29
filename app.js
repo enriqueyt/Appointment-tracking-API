@@ -23,6 +23,7 @@ var routes = require('./routes/index');
 var authenticate = require('./routes/authenticate')(passport);
 var appointment = require('./routes/appointment');
 var client = require('./routes/client');
+var distributionLine = require('./routes/distributionLine');
 var initPassport = require('./routes/users')(passport);
 
 var app = express();
@@ -42,6 +43,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(function(req, res, next){
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   next();
 });
 
@@ -54,6 +56,7 @@ app.use('/', routes);
 app.use('/auth', authenticate);
 app.use('/api/appointment', appointment);
 app.use('/api/client', client);
+app.use('/api/distributionLine', distributionLine);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
