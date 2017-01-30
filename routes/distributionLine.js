@@ -126,7 +126,7 @@ router
 				function(err, result){
 					if(err)
 						return res.json({ error:true, message:err });
-					return res.json({ error:false, return:result });
+					return res.json({ error:false, data:result });
 				});
 
 	});

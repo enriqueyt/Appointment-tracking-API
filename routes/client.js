@@ -34,7 +34,7 @@ router
 		if(typeof req.params.referred !== 'undefined')
 			newClient.referred = req.params.referred;
 
-		client.save(callback);
+		newClient.save(callback);
 
 		function callback(err, doc){
 			if(err)
