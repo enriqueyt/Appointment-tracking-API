@@ -102,24 +102,5 @@ module.exports = function(passport){
 			});
 	}));
 
-	router
-		.get('/userByDl', function(req, res, next){
-			var query = {_id : req.params._id};
-
-			user
-				.find(query)
-				.populate('dl')
-				.exec(callback);
-
-			function callback(err, doc){
-				if(err)
-					return res.json({error:true,message:err});
-				if(!doc)
-					return res.json({error:false, result:'Distributor line no found'});
-				else
-					return res.json({error:false, result:doc});	
-			};
-		});
-
 	return router;
 };

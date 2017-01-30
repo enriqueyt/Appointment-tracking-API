@@ -128,7 +128,6 @@ router
 						return res.json({ error:true, message:err });
 					return res.json({ error:false, data:result });
 				});
-
 	});
 
 module.exports = router;

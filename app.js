@@ -25,6 +25,7 @@ var appointment = require('./routes/appointment');
 var client = require('./routes/client');
 var distributionLine = require('./routes/distributionLine');
 var initPassport = require('./routes/users')(passport);
+var user = require('./routes/user');
 
 var app = express();
 
@@ -54,6 +55,7 @@ app.use(passport.session({
 
 app.use('/', routes);
 app.use('/auth', authenticate);
+app.use('/api/user', user);
 app.use('/api/appointment', appointment);
 app.use('/api/client', client);
 app.use('/api/distributionLine', distributionLine);
