@@ -4,9 +4,14 @@ var Schema = mongoose.Schema;
 var client = new Schema({
 	name : String,
 	state : String,
-	location: [],
+	locationLat: {
+		type:String
+	},
+	locationLon: {
+		type:String
+	},
 	referred : {
-		type:String,
+		type:Schema.Types.ObjectId,
 		ref:'client'		
 	},
 	createAt : {
@@ -24,6 +29,15 @@ var client = new Schema({
 		type: Boolean,
 		default: false,
 		index:true
+	},
+	attended: {
+		type: Boolean,
+		default: false,
+		index:true
+	},
+	sendBy:{
+		type : Schema.Types.ObjectId,
+		ref : 'user'
 	}
 });
 

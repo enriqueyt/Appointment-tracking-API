@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 
 var appointment = new Schema({
-	createBy : {
+	assignedTo : {
 		type : Schema.Types.ObjectId,
 		ref : 'user'
 	},
@@ -12,7 +12,7 @@ var appointment = new Schema({
 		ref : 'client'
 	},
 	location : {
-		type : [String],
+		type : String,
 		index : true
 	},
 	appointmentDate : {

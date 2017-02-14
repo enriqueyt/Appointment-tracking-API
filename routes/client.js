@@ -15,31 +15,34 @@ router
 			if(err)
 				return res.json({error:true,message:err});
 			if(!doc)
-				return res.json({error:false, result:'client no found'});
+				return res.json({error:true, message:'client no found'});
 			else
-				return res.json({error:false, result:doc});	
+				return res.json({error:false, data:doc});	
 		};
 	})
 	.post(function(req, res, next){
 	
 		var newClient = new client();
 
-		newClient.name = req.params.name;
-		newClient.state = 'active';
-		newClient.phone = req.params.phone;
+		newClient.name = req.body.name;
+		newClient.phone = req.body.phone;
+		newClient.state = req.body.state;
 
-		if(typeof req.params.location !== 'undefined')
-			newClient.location.push(req.params.location);
+		if(typeof req.body.locationLat !== 'undefined')
+			newClient.locationLat = req.body.locationLat;
 
-		if(typeof req.params.referred !== 'undefined')
-			newClient.referred = req.params.referred;
+		if(typeof req.body.locationLon !== 'undefined')
+			newClient.locationLon = req.body.locationLon;
+
+		if(typeof req.body.referred !== 'undefined')
+			newClient.referred = req.body.referred;
 
 		newClient.save(callback);
 
 		function callback(err, doc){
 			if(err)
 				return res.json({error:true, message:err});
-			return res.json({error:false, result:doc});
+			return res.json({error:false, data:doc});
 		};
 	})
 	.put(function(req, res, next){
@@ -49,24 +52,24 @@ router
 			},
 			option = { upsert:true };
 
-		if(typeof req.params.name !== 'undefined')
-			update.name = req.params.name
+		if(typeof req.body.name !== 'undefined')
+			update.name = req.body.name
 
-		if(typeof req.params.state !== 'undefined')
-			update.state = req.params.state
+		if(typeof req.body.state !== 'undefined')
+			update.state = req.body.state
 
-		if(typeof req.params.phone !== 'undefined')
-			update.phone = req.params.phone
+		if(typeof req.body.phone !== 'undefined')
+			update.phone = req.body.phone
 
-		if(typeof req.params.isRead !== 'undefined')
-			update.isRead = req.params.isRead
+		if(typeof req.body.isRead !== 'undefined')
+			update.isRead = req.body.isRead
 
 		client.findOneAndUpdate(query, update, option, callback);
 
 		function callback(err, doc){
 			if(err)
 				return res.json({error:true,message:err});
-			return res.json({error:false, result:doc});
+			return res.json({error:false, data:doc});
 		};
 	})
 	.delete(function(req, res, next){
@@ -77,12 +80,12 @@ router
 		function callback(err){
 			if(err)
 				return res.json({error:true,message:err});
-			return res.json({error:false, result:true});	
+			return res.json({error:false, data:true});	
 		};
 	})
 
 router
-	.get('/complex/list/:isRead', function(req, res, next){
+	.get('/complex/list/:isRead/:limit/:skip', function(req, res, next){
 
 		var query = {},
 			projection = {};
@@ -95,8 +98,8 @@ router
 			.populate('client')
 			.sort('createAt')
 			.select(projection)
-			.limit(req.params.limit)
-			.skip(req.params.skip)
+			.limit(parseInt(req.params.limit))
+			.skip(parseInt(req.params.skip))
 			.exec(callback);
 
 		function callback(err, docs){
@@ -129,61 +132,63 @@ router
 			
 			_promise
 				.then(function(numAffects){
-					return res.json({error:false, result:docs});
+					return res.json({error:false, data:docs});
 				})
 				.catch(function(err){
 					return res.json({error:true, message:err});
 				});
 		};
-	})
+	});
 
 router
 	.get('/complex/all/:limit/:skip', function(req, res, next){
 		var query = {},
 			projection = {};
 
-		if(typeof req.params.isRead!== 'undefined')
-			query.p_isRead = req.params.isRead;
+		if(typeof req.body.isRead!== 'undefined')
+			query.p_isRead = req.body.isRead;
 
-		if(typeof req.params.name !== 'undefined')
-			query.name = req.params.name; 
+		if(typeof req.body.name !== 'undefined')
+			query.name = req.body.name; 
 
-		if(typeof req.params.state !== 'undefined')
-			query.state = req.params.state; 
+		if(typeof req.body.state !== 'undefined')
+			query.state = req.body.state; 
 
-		if(typeof req.params.createBy !== 'undefined')
-			query.createBy = req.params.createBy; 
+		if(typeof req.body.createBy !== 'undefined')
+			query.createBy = req.body.createBy; 
 
-		if(typeof req.params.referred !== 'undefined')
-			query.referred = req.params.referred; 
+		if(typeof req.body.referred !== 'undefined')
+			query.referred = req.body.referred; 
 
-		if(typeof req.params.createAt !== 'undefined')
+		if(typeof req.body.createAt == 'undefined')
 			projection.createAt = 1;
 
-		if(typeof req.params.p_isRead!== 'undefined')
+		if(typeof req.body.p_isRead== 'undefined')
 			projection.isRead = 1;
 
-		if(typeof req.params.p_name!== 'undefined')
+		if(typeof req.body.p_name== 'undefined')
 			projection.name = 1;
 
-		if(typeof req.params.p_state !== 'undefined')
+		if(typeof req.body.p_state == 'undefined')
 			projection.state = 1;
 
-		if(typeof req.params.p_referred !== 'undefined')
+		if(typeof req.body.p_referred == 'undefined')
 			projection.referred = 1;
 
-		if(typeof req.params.p_createBy !== 'undefined')
+		if(typeof req.body.p_createBy == 'undefined')
 			projection.createBy = 1;
 
-		if(typeof req.params.p_createAt !== 'undefined')
-			projection.createAt = 1;
+		if(typeof req.body.p_createAt == 'undefined')
+			projection.createAt = 1; 
+
+		if(typeof req.body.sendBy == 'undefined')
+			projection.sendBy = 1;
 
 		client
 			.find(query)
-			.sort('createAt')
-			.select(projection)
-			.limit(req.params.limit)
-			.skip(req.params.skip)
+			.sort({createAt:-1})
+			.limit(parseInt(req.params.limit))
+			.skip(parseInt(req.params.skip))
 			.exec(callback);
 
 		function callback(err, docs){
@@ -193,7 +198,7 @@ router
 			if(!docs)
 				return res.json();
 
-			return res.json({error:false, result:docs});
+			return res.json({error:false, data:docs});
 
 		};
 	});
@@ -215,7 +220,7 @@ router
 			if(!docs)
 				return res.json();
 
-			return res.json({error:false, result:docs});
+			return res.json({error:false, data:docs});
 
 		};
 	})

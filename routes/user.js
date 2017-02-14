@@ -2,15 +2,14 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
 var user = mongoose.model('user');
+var role = mongoose.model('roles');
 
 router
-	.route('/:id/:limit/:skip')
+	.route('/:id')
 	.get(function(req, res, next){
 
 		var query = { _id : req.params.id},
-			sort = { _id : 1 },
-			limit = parseInt(req.params.limit),
-			skip =  parseInt(( req.params.skip > 0 ? (( req.params.skip - 1 ) * req.params.limit ) : 0 ))
+			sort = { _id : 1 };			
 
 		user
 			.aggregate([
@@ -19,12 +18,6 @@ router
 				},
 				{ 
 					$sort : sort 
-				},
-				{ 
-					$skip : skip
-				},
-				{ 
-					$limit :  limit
 				}
 			], 
 			function(err, result){
@@ -37,62 +30,76 @@ router
 
 		var newUser = new user();
 
-		newUser.createBy = req.params.user_id;
-		newUser.client_id = req.params.client_id;
-		newUser.description = req.params.description;
-		newUser.is_client = req.params.is_client;
-		newUser.appointmentDate = req.params.appointmentDate;
+		newUser.name 		= req.body.name;
+		newUser.username 	= req.body.username;
+		newUser.description = req.body.description;
+		newUser.password 	= req.body.password;
+		newUser.email 		= req.body.email;
+		newUser.admin 		= req.body.admin;
+		newUser.location 	= req.body.location;
 
-		if(typeof req.params.products != 'undefined')
-			newAppointment.products.push(req.params.products);
+		if(typeof req.body.role != 'undefined')
+			newUser.role.push(req.body.role);
+		
+		if(typeof req.body.distributorLine != 'undefined')
+			newUser.distributorLine = req.body.distributorLine;
 
 		newUser.save(function(err, doc){
 			if(err)
-				return res.json({ error:false, message:err });
-			return res.json({ error:true, message:doc })
+				return res.json({ error:true, message:err });
+			return res.json({ error:false, data:doc })
 		});
 	})
 	.put(function(req, res, next){
 
-		var query = { _id : req.params.appointment_id },
+		var query = { _id : req.params.id },
 			update = {},
 			option = { upsert:true };
 
-		if(typeof req.params.description !== 'undefined')
-			update.description = req.params.description
+		if(typeof req.body.name !== 'undefined')
+			update.name = req.body.name;
 
-		if(typeof req.params.is_client !== 'undefined')
-			update.is_client = req.params.is_client
+		if(typeof req.body.username !== 'undefined')
+			update.username = req.body.username;
 
-		if(typeof req.params.wasAttended !== 'undefined')
-			update.wasAttended = req.params.wasAttended
+		if(typeof req.body.description !== 'undefined')
+			update.description = req.body.description;
 
-		if(typeof req.params.howWasAppointment !== 'undefined')
-			update.howWasAppointment = req.params.howWasAppointment
+		if(typeof req.body.password !== 'undefined')
+			update.password = req.body.password;
 
-		if(typeof req.params.location != 'undefined'){
-			if(req.params.location.length > 0 )
-				update.location.push(req.params.location);
-		}
+		if(typeof req.body.email != 'undefined')
+			update.email = req.body.email;
 
-		client.findOneAndUpdate(query, update, option, callback);
+		if(typeof req.body.admin != 'undefined')
+			update.admin = req.body.admin;
+
+		if(typeof req.body.location != 'undefined')
+			update.location = req.body.location;
+
+		if(typeof req.body.role != 'undefined')
+			update.role = req.body.role;
+
+		if(typeof req.body.distributorLine != 'undefined')
+			update.distributorLine = req.body.distributorLine;
+
+		user.findOneAndUpdate(query, update, option, callback);
 
 		function callback(err, doc){
 			if(err)
 				return res.json({ error:true, message:err });
-			return res.json({ error:false, result:doc });
+			return res.json({ error:false, data:doc });
 		};
 	})
 	.delete(function(req, res, next){
-		var query = { _id : req.params.appointment_id };
+		var query = { _id : req.params.id };
 
-		client.remove(query, callback);
+		user.remove(query, callback);
 
 		function callback(err){
 			if(err)
 				return res.json({ error:true, message:err });
-
-			return res.json({ error:false, result:true });	
+			return res.json({ error:false, data:true });	
 		};
 	});
 
@@ -109,7 +116,7 @@ router
 			if(err)
 				return res.json({error:true,message:err});
 			if(!doc)
-				return res.json({error:false, result:'Distributor line no found'});
+				return res.json({error:false, message:'Distributor line no found'});
 			else
 				return res.json({error:false, data:doc});	
 		};
@@ -141,4 +148,40 @@ router
 			});
 	});
 
-module.exports = router;
+router
+	.route('/role/list/:id')
+	.get(function(req, res){
+		role
+			.find({}, function(err, data){				
+				console.log(data)
+				console.log(err)
+				if(err)
+					return res.json({ error:true, message:err });
+				return res.json({ error:false, data:data});
+			})
+	})
+	.post(function(req, res){
+		var newRole = new role();
+
+		newRole.name = req.body.name;		
+		newRole.active 	= req.body.active;		
+
+		newRole.save(function(err, doc){
+			if(err)
+				return res.json({ error:true, message:err });
+			return res.json({ error:false, data:doc })
+		});
+	})
+	.delete(function(req, res){
+		var query = { _id : req.params.id };
+
+		user.remove(query, callback);
+
+		function callback(err){
+			if(err)
+				return res.json({ error:true, message:err });
+			return res.json({ error:false, data:true });	
+		};
+	});
+
+module.exports = router;	

@@ -11,6 +11,7 @@ require('./models/distributionLine');
 require('./models/user');
 require('./models/client');
 require('./models/appointment');
+require('./models/role');
 
 var mongoose = require('mongoose');
 var config = require('./config/config');
