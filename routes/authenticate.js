@@ -7,25 +7,27 @@ module.exports = function(passport){
 	
 	router.post('/login', function(req, res, next){
 
-		passport.authenticate('login', function(err, user, info){
-			console.log(err)
-			if(err){
+		passport.authenticate('login', function(data){
+			
+			if(data.error){
 				res.json({
-					success : !err,
-					message : info
+					success : !data.error,
+					message : data.message
 				});
 
 				return;
 			};
-				
+
 			res.json({
 				success : true,
-				doc : {
-					id : user._id, 
-					admin:user.admin,
-					name:user.name
+				data : {
+					id : data.data._id, 
+					admin:data.data.admin,
+					name:data.data.name,
+					role:data.data.role,
+					distributionLine:data.data.distributorLine
 				},
-				info : info
+				info : data.message
 			});
 		})(req, res, next)
 

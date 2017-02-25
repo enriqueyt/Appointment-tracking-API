@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
 var appointment = mongoose.model('appointment');
+var ObjectId = require('mongoose').Types.ObjectId; 
+
 
 router
 	.route('/:appointment_id')
@@ -39,7 +41,7 @@ router
 			
 		if(typeof req.body.products != 'undefined')
 			newAppointment.products.push(req.body.products);
-
+		
 		newAppointment.save(function(err, doc){
 			if(err)
 				return res.json({ error:true, message:err });
@@ -47,33 +49,42 @@ router
 		});
 	})
 	.put(function(req, res, next){
-
-		var query = { _id : req.params.appointment_id },
-			update = {},
+		var ObjectId = require('mongoose').Types.ObjectId;
+		
+		var query = { "_id" : new ObjectId(req.params.appointment_id) },			
 			option = { upsert:true };
-
-		if(typeof req.body.description !== 'undefined')
-			update.description = req.body.description
-
-		if(typeof req.body.is_client !== 'undefined')
-			update.is_client = req.body.is_client
-
-		if(typeof req.body.wasAttended !== 'undefined')
-			update.wasAttended = req.body.wasAttended
-
-		if(typeof req.body.howWasAppointment !== 'undefined')
-			update.howWasAppointment = req.body.howWasAppointment
-
-		if(typeof req.body.location != 'undefined'){			
-			update.location = req.body.location;
-		}
-
-		client.findOneAndUpdate(query, update, option, callback);
+		
+		appointment.findOne(query, callback);
 
 		function callback(err, doc){
-			if(err)
-				return res.json({ error:true, message:err });
-			return res.json({ error:false, result:doc });
+			
+			if(err || !doc){
+				return res.json({ error:true, message:'No exite el documento' });
+			}
+
+			if(typeof req.body.description !== 'undefined')
+				doc.description = req.body.description
+
+			if(typeof req.body.is_client !== 'undefined')
+				doc.is_client = req.body.is_client
+
+			if(typeof req.body.wasAttended !== 'undefined')
+				doc.wasAttended = req.body.wasAttended
+
+			if(typeof req.body.howWasAppointment !== 'undefined')
+				doc.howWasAppointment = req.body.howWasAppointment
+
+			if(typeof req.body.location != 'undefined'){			
+				doc.location = req.body.location;
+			}
+			
+			if(typeof req.body.products !== 'undefined'){
+				doc.products = req.body.products;
+			}
+
+			doc.save();
+
+			return res.json({ error:false, data:doc });
 		};
 	})
 	.delete(function(req, res, next){
@@ -91,8 +102,9 @@ router
 
 router
 	.put('/reassignedAppointment/:id/:newDate', function(req, res){
+
 		var query = {
-				_id : req.params.id
+				_id : new ObjectId(req.params.id)
 			},
 			update = {
 				reAssigned : true,
@@ -167,9 +179,9 @@ router
 	
 		appointment
 			.find({})
-			.sort({appointmentDate:-1})
-			.populate('assignedTo')
+			.sort({appointmentDate:1})
 			.populate('client')
+			.populate('assignedTo')
 			.limit(parseInt(req.params.limit))
 			.skip(parseInt(req.params.skip))
 			.exec(callback);
@@ -187,29 +199,32 @@ router
 	});
 
 router
-	.get('/appointmentsByUser/:createBy/:skip/:limit', function(req, res, next){
+	.get('/appointments/byUser/:createBy/:limit/:skip', function(req, res, next){
 
-		var query = { createBy : req.params.createBy },
-			sort = { appointmentDate : 1 }
+		var query = { assignedTo : new ObjectId(req.params.createBy) },
+			sort = { appointmentDate : 1 },
+			limit = parseInt(req.params.limit),
+			skip =  parseInt(( req.params.skip > 0 ? (( req.params.skip - 1 ) * req.params.limit ) : 0 ));
 
 		appointment
-			.aggregate([
-					{ $match : query },
-					{ $sort : sort },
-					{ $limit : req.params.limit },
-					{ $skip : req.params.skip }
-				], 
-				function(err, result){
-					if(err)
-						return res.json({ error:true, message:err });
-					return res.json({ error:false, return:result });
-				});
+			.find(query)
+			.populate('client')
+			.limit(limit)
+			.sort({appointmentDate:1})
+			.skip(skip)
+			.exec(callback);
+
+			function callback(err, result){
+				if(err)
+					return res.json({ error:true, message:err });
+				return res.json({ error:false, data:result });
+			};
 	});
 
 router
 	.get('/appointmentsUserByDay/:createBy/:date/:skip/:limit', function(req, res, next){
 
-		var query = { createBy : req.params.createBy },
+		var query = { assignedTo : new ObjectId(req.params.createBy) },
 			sort = { appointmentDate : 1 },
 			time = new Date(),
 			today = new Date(time.getDate(), time.getMonth(), time.getFullYear())
@@ -239,7 +254,7 @@ router
 	.get('/groupByuser/:user_id/:date/:attended', function(req, res, next){
 
 		var obj = { 
-			id : req.params.user_id,
+			id : new ObjectId(req.params.user_id),
 			$month : typeof req.params.date !== 'undefined' ? new Date(req.params.date).getMonth() : new Date().getMonth()
 		}
 

@@ -36,23 +36,19 @@ module.exports = function(passport){
 		var query = {'username': username};
 
 		user
-			.findOne(query, function(err, doc){
-
+			.findOne(query, function(err, doc){	
+				
 				if(err)
-					return done(true, false, {message:err});
-
+					return done({error:true, data:false, message:err});				
 				if(!doc){
-					console.log('no existe el usuario');
-					return done(true, false, {message:'no existe el usuario'});
+					return done({error:true, data:false, message:'no existe el usuario'});
 				}
 
-				if(!isValidPassword(doc, password)){
+				if(/*!isValidPassword(doc, password) ||*/doc.password != password){
 					console.log('password errado!');
-					return done(true, false, {message:'password errado!'});
-				}	
-
-				done(false, doc);
-
+					return done({error:true, data:false, message:'password errado!'});
+				}
+				return done({error:false, data:doc, message:'Exito!'});
 			});
 	}));
 
