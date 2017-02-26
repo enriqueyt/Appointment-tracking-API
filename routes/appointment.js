@@ -251,37 +251,34 @@ router
 	});
 
 router
-	.get('/groupByuser/:user_id/:date/:attended', function(req, res, next){
+	.get('/groupByuser/:_id/:attended', function(req, res, next){
 
 		var obj = { 
-			id : new ObjectId(req.params.user_id),
-			$month : typeof req.params.date !== 'undefined' ? new Date(req.params.date).getMonth() : new Date().getMonth()
+			/*$month : typeof req.params.date !== 'undefined' ? new Date(req.params.date).getMonth() : new Date().getMonth()*/
 		}
-
-		if(typeof req.params.attended !== 'undefined')
-			obj.wasAttended = req.params.attended;
-
-		var query = { 
-				$match : obj
-			};
+		
+		var query = 
+			[{ 
+				$match : {
+					assignedTo : new ObjectId(req.params._id)
+				}
+			},{
+				$group : {
+					_id : '$wasAttended',
+					count : { 
+						$sum : 1 
+					}
+				}
+			}];
 
 		appointment
-			.aggregate([
-					query,
-					{
-						$group : {
-							_id : '$createBy',
-							count : { 
-								$sum : 1 
-							}
-						} 
-					}
-				], 
+			.aggregate(query, 
 				function(err, doc){
 					if(err)
 						return res.json({ error:true, message:err });
-					return res.json({ error:false, return:result });
+					return res.json({ error:false, data:doc });
 				});
 	});
+
 
 module.exports = router;
