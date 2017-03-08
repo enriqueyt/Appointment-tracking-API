@@ -23,7 +23,8 @@ var client = new Schema({
 		default: Date.now
 	},
 	phone:{
-		type: String
+		type: String,
+		unique:true
 	},
 	isRead : {
 		type: Boolean,

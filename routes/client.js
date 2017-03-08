@@ -4,6 +4,8 @@ var mongoose = require('mongoose');
 var client = mongoose.model('client');
 var distributionLine = mongoose.model('distributionLine');
 var Promise = require('promise');
+var ObjectId = require('mongoose').Types.ObjectId; 
+var Promise = require('promise');
 
 router
 	.route('/:client_id')
@@ -110,7 +112,7 @@ router
 
 				var ids = [], cant = 0;
 
-				for(var i = 0, cant = docs.lenght; i < cant; i++ ){
+				for(var i = 0, cant = docs.length; i < cant; i++ ){
 					ids.push(clients._id);				
 				}
 
@@ -223,6 +225,91 @@ router
 			return res.json({error:false, data:docs});
 
 		};
-	})
+	});
+
+router
+	.post('/saveProspect/:id', function(req, res){
+		var ok = true, len = 0, lstprospects = [], _sendBy = new ObjectId(req.params.id);
+
+		var load = new Promise(function(resolve, reject){
+			req.body.forEach(function(element) {				
+				lstprospects.push(element);
+			}, this);			
+			resolve(lstprospects);
+		})
+
+		load
+			.then(function(data){
+				lstprospects=data;				
+				iterateProspects(lstprospects);
+			},function(err){
+				console.log(err)
+				ok=false;
+			});
+
+		function iterateProspects(array){
+
+			if(array!=undefined){
+				lstprospects=array;
+				len=lstprospects.length;	
+			}
+
+			var currentProspect = lstprospects.pop();
+
+			if(currentProspect.name.length>0){
+
+				isProspect(currentProspect)
+					.then(function(data){						
+						if(!data){
+							saveProspect(currentProspect, _sendBy)
+								.then(function(data){									
+									if(--len)iterateProspects();									
+								},function(err){
+									ok=false;
+								});
+						}else{
+							if(--len)iterateProspects();
+						}
+					},function(err){						
+						console.log(err)
+						ok=false;
+					});
+			}else{
+				if(--len)iterateProspects();
+			}
+		};
+
+		function saveProspect(prospect, id){
+			return new Promise(function(resolve, reject){
+				var newClient = new client();
+				newClient.name=prospect.name;
+				newClient.phone=prospect.phone;
+				newClient.sendBy=id;
+				newClient.save(function(err){					
+					if(err)reject(err);
+					resolve(err);								
+				});
+			});
+		};
+
+		function isProspect(prospect){
+			return new Promise(function(resolve, reject){
+				client
+					.find({name:prospect.name, phone:prospect.phone})
+					.exec(function(err,data){						
+						if(err){
+							reject(false);
+						}
+						resolve(data.length==0?false:true);
+					});
+			});
+		};
+
+		if(ok)
+			return res.json({error:false, data:true});
+		else
+			return res.json({error:true, data:false});
+	
+	});
 		
 module.exports = router;

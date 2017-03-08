@@ -11,6 +11,9 @@ var appointment = new Schema({
 		type : Schema.Types.ObjectId,
 		ref : 'client'
 	},
+	address:{
+		type:String
+	},
 	location : {
 		type : String,
 		index : true

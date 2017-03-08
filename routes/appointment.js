@@ -32,6 +32,7 @@ router
 		newAppointment.client = req.body.client;	
 		newAppointment.description = req.body.description;		
 		newAppointment.appointmentDate = req.body.appointmentDate;
+		newAppointment.address = req.body.address;
 
 		if(typeof req.body.is_client != 'undefined')
 			newAppointment.is_client = req.body.is_client;
@@ -80,6 +81,10 @@ router
 			
 			if(typeof req.body.products !== 'undefined'){
 				doc.products = req.body.products;
+			}
+			
+			if(typeof req.body.address !== 'undefined'){
+				doc.address = req.body.address;
 			}
 
 			doc.save();
