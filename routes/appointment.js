@@ -62,6 +62,12 @@ router
 			if(err || !doc){
 				return res.json({ error:true, message:'No exite el documento' });
 			}
+			
+			if(typeof req.body.reAssigned !== 'undefined')
+				doc.reAssigned = req.body.reAssigned
+
+			if(typeof req.body.appointmentDate !== 'undefined')
+				doc.appointmentDate = req.body.appointmentDate
 
 			if(typeof req.body.description !== 'undefined')
 				doc.description = req.body.description
@@ -227,32 +233,50 @@ router
 	});
 
 router
-	.get('/appointmentsUserByDay/:createBy/:date/:skip/:limit', function(req, res, next){
+	.get('/appointmentsUserByDay/:createBy/:date/:limit/:skip', function(req, res, next){
 
-		var query = { assignedTo : new ObjectId(req.params.createBy) },
+		var query = { assignedTo : new ObjectId(req.params.createBy)},
 			sort = { appointmentDate : 1 },
 			time = new Date(),
-			today = new Date(time.getDate(), time.getMonth(), time.getFullYear())
+			today = new Date(time.getDate(), time.getMonth(), time.getFullYear()),
+			limit = parseInt(req.params.limit),
+			skip =  parseInt(( req.params.skip > 0 ? (( req.params.skip - 1 ) * req.params.limit ) : 0 )),
+			lessThan = new Date(req.params.date)
+			lessThan.setDate(lessThan.getDate()+1);
 
-			if(typeof req.params.date != 'undefined')
-				query.appointmentDate = { 
-					appointmentDate : { 
-						'$gt' : today 
-					} 
-				}
-
+		if(typeof req.params.date != 'undefined')
+			query.appointmentDate = { 
+				'$gte' : new Date(req.params.date),
+				'$lt': lessThan	
+			}
+		
+		appointment
+			.find(query)
+			.populate('client')
+			.limit(limit)
+			.sort({appointmentDate:1})
+			.skip(skip)
+			.exec(function(err, result){
+				if(err)
+					return res.json({ error:true, message : err });
+				return res.json({ error:false, data:result });
+			});
+				
+			/*
 		appointment
 			.aggregate([
 					{ $match : query },
-					{ $sort : sort },
-					{ $limit : req.params.limit },
-					{ $skip : req.params.skip }
+					{ $limit : limit },
+					{ $skip : skip },
+					{ $sort : sort }
+					
 				],
 				function(err, result){
 					if(err)
 						return res.json({ error:true, message : err });
-					return res.json({ error:false, return:result });
+					return res.json({ error:false, data:result });
 				});
+				*/
 	});
 
 router

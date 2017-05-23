@@ -188,6 +188,7 @@ router
 
 		client
 			.find(query)
+			.populate('sendBy')
 			.sort({createAt:-1})
 			.limit(parseInt(req.params.limit))
 			.skip(parseInt(req.params.skip))
@@ -236,7 +237,7 @@ router
 				lstprospects.push(element);
 			}, this);			
 			resolve(lstprospects);
-		})
+		});
 
 		load
 			.then(function(data){
