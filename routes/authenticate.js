@@ -1,12 +1,10 @@
 var express = require('express');
 var router = express.Router();
 
-
 module.exports = function(passport){
 
-	
 	router.post('/login', function(req, res, next){
-
+		
 		passport.authenticate('login', function(data){
 			
 			if(data.error){
@@ -14,10 +12,11 @@ module.exports = function(passport){
 					success : !data.error,
 					message : data.message
 				});
-
+				res.end();
 				return;
 			};
-
+			console.log('data')
+			console.log(data)
 			res.json({
 				success : true,
 				data : {

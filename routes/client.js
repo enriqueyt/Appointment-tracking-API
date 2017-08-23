@@ -84,7 +84,7 @@ router
 				return res.json({error:true,message:err});
 			return res.json({error:false, data:true});	
 		};
-	})
+	});
 
 router
 	.get('/complex/list/:isRead/:limit/:skip', function(req, res, next){

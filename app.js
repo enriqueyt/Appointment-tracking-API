@@ -18,7 +18,9 @@ var config = require('./config/config');
 var utils = require('./libs/utils');
 
 var mongooseConnection = utils.connectionDB(mongoose, config);
-
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'Database connection error:'));
+db.once('open', console.error.bind(console, 'Connected to MongDB'));
 var routes = require('./routes/index');
 
 var authenticate = require('./routes/authenticate')(passport);

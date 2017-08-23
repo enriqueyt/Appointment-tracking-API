@@ -244,12 +244,13 @@ router
 			lessThan = new Date(req.params.date)
 			lessThan.setDate(lessThan.getDate()+1);
 
-		if(typeof req.params.date != 'undefined')
+		if(typeof req.params.date != 'undefined'){
 			query.appointmentDate = { 
 				'$gte' : new Date(req.params.date),
 				'$lt': lessThan	
 			}
-		
+		};
+
 		appointment
 			.find(query)
 			.populate('client')
@@ -263,8 +264,8 @@ router
 			});
 				
 			/*
-		appointment
-			.aggregate([
+			appointment
+				.aggregate([
 					{ $match : query },
 					{ $limit : limit },
 					{ $skip : skip },
@@ -276,7 +277,7 @@ router
 						return res.json({ error:true, message : err });
 					return res.json({ error:false, data:result });
 				});
-				*/
+			*/
 	});
 
 router
@@ -308,6 +309,5 @@ router
 					return res.json({ error:false, data:doc });
 				});
 	});
-
 
 module.exports = router;

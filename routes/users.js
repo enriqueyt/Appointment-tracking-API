@@ -9,7 +9,7 @@ var users = {};
 
 module.exports = function(passport){
 
-	var isValidPassword = function(doc, password){		
+	var isValidPassword = function(doc, password){
 		return bCrypt.compareSync(password, doc.password);
 	};
 
@@ -34,7 +34,7 @@ module.exports = function(passport){
 	}, function(req, username, password, done){
 
 		var query = {'username': username};
-
+		
 		user
 			.findOne(query, function(err, doc){	
 				
@@ -77,8 +77,8 @@ module.exports = function(passport){
 					newUser.password = createHash(password);					
 					newUser.email = req.body.email;
 
-					if(typeof req.params.admin != 'undefined')
-						newUser.admin = req.params.admin;
+					if(typeof req.body.admin != 'undefined')
+						newUser.admin = req.body.admin;
 
 					if(typeof req.body.distributorLine != 'undefined')
 						newUser.distributorLine = req.body.distributorLine;
@@ -98,5 +98,4 @@ module.exports = function(passport){
 			});
 	}));
 
-	return router;
 };
