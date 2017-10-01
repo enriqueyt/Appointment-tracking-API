@@ -6,6 +6,9 @@ var distributionLine = mongoose.model('distributionLine');
 var Promise = require('promise');
 var ObjectId = require('mongoose').Types.ObjectId; 
 var Promise = require('promise');
+var request = require('request');
+var cheerio = require('cheerio');
+var utils = require('../libs/utils');
 
 router
 	.route('/:client_id')
@@ -23,29 +26,37 @@ router
 		};
 	})
 	.post(function(req, res, next){
-	
-		var newClient = new client();
+		
+		utils.create_avatar(cheerio, request, function(avatar){
+			console.log('avatar')
+			console.log(avatar)
+			var newClient = new client();
 
-		newClient.name = req.body.name;
-		newClient.phone = req.body.phone;
-		newClient.state = req.body.state;
+			newClient.name = req.body.name;
+			newClient.phone = req.body.phone;
+			newClient.state = req.body.state;
 
-		if(typeof req.body.locationLat !== 'undefined')
-			newClient.locationLat = req.body.locationLat;
+			if(typeof req.body.locationLat !== 'undefined')
+				newClient.locationLat = req.body.locationLat;
 
-		if(typeof req.body.locationLon !== 'undefined')
-			newClient.locationLon = req.body.locationLon;
+			if(typeof req.body.locationLon !== 'undefined')
+				newClient.locationLon = req.body.locationLon;
 
-		if(typeof req.body.referred !== 'undefined')
-			newClient.referred = req.body.referred;
+			if(typeof req.body.referred !== 'undefined')
+				newClient.referred = req.body.referred;
 
-		newClient.save(callback);
+			if(avatar!=''){
+				newUser.avatar=avatar;
+			}
 
-		function callback(err, doc){
-			if(err)
-				return res.json({error:true, message:err});
-			return res.json({error:false, data:doc});
-		};
+			newClient.save(callback);
+
+			function callback(err, doc){
+				if(err)
+					return res.json({error:true, message:err});
+				return res.json({error:false, data:doc});
+			};
+		});
 	})
 	.put(function(req, res, next){
 		var query = { _id : req.params.client_id},

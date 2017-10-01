@@ -4,6 +4,9 @@ var mongoose = require('mongoose');
 var user = mongoose.model('user');
 var LocalStrategy = require('passport-local').Strategy;
 var bCrypt = require('bcrypt-nodejs');
+var request = require('request');
+var cheerio = require('cheerio');
+var utils = require('../libs/utils');
 
 var users = {};
 
@@ -44,7 +47,7 @@ module.exports = function(passport){
 					return done({error:true, data:false, message:'no existe el usuario'});
 				}
 
-				if(/*!isValidPassword(doc, password) ||*/doc.password != password){
+				if(isValidPassword(doc, password)){
 					console.log('password errado!');
 					return done({error:true, data:false, message:'password errado!'});
 				}
@@ -70,30 +73,40 @@ module.exports = function(passport){
 					console.log('User already exists')
 					return done(true, null, 'User already exists')
 				}else{
+					console.log('antes del avatar')
+					utils.create_avatar(cheerio, request, function(avatar){
+						console.log('-------')
+						console.log(avatar)
+						var newUser = new user();
 
-					var newUser = new user();
+						newUser.username = username;
+						newUser.password = createHash(password);					
+						newUser.email = req.body.email;
 
-					newUser.username = username;
-					newUser.password = createHash(password);					
-					newUser.email = req.body.email;
+						if(typeof req.body.admin != 'undefined')
+							newUser.admin = req.body.admin;
 
-					if(typeof req.body.admin != 'undefined')
-						newUser.admin = req.body.admin;
+						if(typeof req.body.distributorLine != 'undefined')
+							newUser.distributorLine = req.body.distributorLine;
 
-					if(typeof req.body.distributorLine != 'undefined')
-						newUser.distributorLine = req.body.distributorLine;
-
-					if(typeof req.body.location != 'undefined')
-						newUser.location = req.body.location;
-
-					newUser.save(function(err){
-						if(err){
-							done(true, null, 'Error saved');
-						}
+						if(typeof req.body.location != 'undefined')
+							newUser.location = req.body.location;
 						
-						return done(false, newUser, 'Success');
-					});
+						if(typeof req.body.role != 'undefined')
+							newUser.role.push(req.body.role);
 
+						if(avatar!=''){
+							newUser.avatar=avatar;
+						}
+
+						newUser.save(function(err){
+							if(err){
+								done(true, null, 'Error saved');
+							}
+							
+							return done(false, newUser, 'Success');
+						});
+					});
 				}
 			});
 	}));

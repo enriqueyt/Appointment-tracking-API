@@ -39,6 +39,9 @@ var client = new Schema({
 	sendBy:{
 		type : Schema.Types.ObjectId,
 		ref : 'user'
+	},
+	avatar:{
+		type:String
 	}
 });
 

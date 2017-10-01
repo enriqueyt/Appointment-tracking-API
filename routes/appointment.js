@@ -2,8 +2,8 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
 var appointment = mongoose.model('appointment');
-var ObjectId = require('mongoose').Types.ObjectId; 
-
+var ObjectId = require('mongoose').Types.ObjectId;
+var moment = require('moment');
 
 router
 	.route('/:appointment_id')
@@ -240,14 +240,15 @@ router
 			time = new Date(),
 			today = new Date(time.getDate(), time.getMonth(), time.getFullYear()),
 			limit = parseInt(req.params.limit),
-			skip =  parseInt(( req.params.skip > 0 ? (( req.params.skip - 1 ) * req.params.limit ) : 0 )),
-			lessThan = new Date(req.params.date)
-			lessThan.setDate(lessThan.getDate()+1);
+			skip =  parseInt(( req.params.skip > 0 ? (( req.params.skip - 1 ) * req.params.limit ) : 0 ));
+		
+		var today = moment(req.params.date);
+		var tommorrow = moment(req.params.date).add(1, 'day');
 
 		if(typeof req.params.date != 'undefined'){
-			query.appointmentDate = { 
-				'$gte' : new Date(req.params.date),
-				'$lt': lessThan	
+			query.appointmentDate = {
+				'$gte' : today,
+				'$lt': tommorrow	
 			}
 		};
 
@@ -304,8 +305,8 @@ router
 		appointment
 			.aggregate(query, 
 				function(err, doc){
-					if(err)
-						return res.json({ error:true, message:err });
+					if(err) return res.json({ error:true, message:err });
+					if(typeof doc == 'object') return res.json({ error:false, data:[] });
 					return res.json({ error:false, data:doc });
 				});
 	});

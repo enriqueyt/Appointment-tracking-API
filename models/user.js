@@ -38,8 +38,10 @@ var user = new Schema({
 	distributorLine : {
 		type : Schema.Types.ObjectId,
 		ref : 'dl'
+	},
+	avatar:{
+		type:String
 	}
-
 });
 
 user.methods.test = function(ed){

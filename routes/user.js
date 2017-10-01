@@ -3,6 +3,7 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var user = mongoose.model('user');
 var role = mongoose.model('roles');
+var bCrypt = require('bcrypt-nodejs');
 
 router
 	.route('/:id')
@@ -33,7 +34,7 @@ router
 		newUser.name 		= req.body.name;
 		newUser.username 	= req.body.username;
 		newUser.description = req.body.description;
-		newUser.password 	= req.body.password;
+		newUser.password 	= bCrypt.hashSync(req.body.password, bCrypt.genSaltSync(10), null);
 		newUser.email 		= req.body.email;
 		newUser.admin 		= req.body.admin;
 		newUser.location 	= req.body.location;
@@ -183,5 +184,31 @@ router
 			return res.json({ error:false, data:true });	
 		};
 	});
+
+router.post('/user/seed',function(req, res){
+
+	var newUser = new user();
+
+	newUser.name 		= req.body.name;
+	newUser.username 	= req.body.username;
+	newUser.description = req.body.description;
+	newUser.password 	= req.body.password;
+	newUser.email 		= req.body.email;
+	newUser.admin 		= req.body.admin;
+	newUser.location 	= req.body.location;
+
+	if(typeof req.body.role != 'undefined')
+		newUser.role.push(req.body.role);
+	
+	if(typeof req.body.distributorLine != 'undefined')
+		newUser.distributorLine = req.body.distributorLine;
+
+	newUser.save(function(err, doc){
+		if(err)
+			return res.json({ error:true, message:err });
+		return res.json({ error:false, data:doc })
+	});
+	
+});
 
 module.exports = router;	
