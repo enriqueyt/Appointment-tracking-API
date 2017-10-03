@@ -15,8 +15,7 @@ module.exports = function(passport){
 				res.end();
 				return;
 			};
-			console.log('data')
-			console.log(data)
+
 			res.json({
 				success : true,
 				data : {
@@ -24,7 +23,8 @@ module.exports = function(passport){
 					admin:data.data.admin,
 					name:data.data.name,
 					role:data.data.role,
-					distributionLine:data.data.distributorLine
+					distributionLine:data.data.distributorLine,
+					avatar:typeof data.data.avatar!='undefined'?data.data.avatar:''
 				},
 				info : data.message
 			});

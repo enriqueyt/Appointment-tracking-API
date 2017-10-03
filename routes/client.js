@@ -26,37 +26,36 @@ router
 		};
 	})
 	.post(function(req, res, next){
-		
-		utils.create_avatar(cheerio, request, function(avatar){
-			console.log('avatar')
-			console.log(avatar)
-			var newClient = new client();
 
-			newClient.name = req.body.name;
-			newClient.phone = req.body.phone;
+		var newClient = new client();
+
+		newClient.name = req.body.name;
+		newClient.phone = req.body.phone;
+
+		if(typeof req.body.state !== 'undefined')
 			newClient.state = req.body.state;
 
-			if(typeof req.body.locationLat !== 'undefined')
-				newClient.locationLat = req.body.locationLat;
+		if(typeof req.body.locationLat !== 'undefined')
+			newClient.locationLat = req.body.locationLat;
 
-			if(typeof req.body.locationLon !== 'undefined')
-				newClient.locationLon = req.body.locationLon;
+		if(typeof req.body.locationLon !== 'undefined')
+			newClient.locationLon = req.body.locationLon;
 
-			if(typeof req.body.referred !== 'undefined')
-				newClient.referred = req.body.referred;
+		if(typeof req.body.referred !== 'undefined')
+			newClient.referred = req.body.referred;
 
-			if(avatar!=''){
-				newUser.avatar=avatar;
-			}
+		if(typeof req.body.avatar!=='undefined'){
+			newClient.avatar=req.body.avatar;
+		}
+		
+		newClient.save(callback);
 
-			newClient.save(callback);
-
-			function callback(err, doc){
-				if(err)
-					return res.json({error:true, message:err});
-				return res.json({error:false, data:doc});
-			};
-		});
+		function callback(err, doc){
+			if(err)
+				return res.json({error:true, message:err});
+			return res.json({error:false, data:doc});
+		};
+	
 	})
 	.put(function(req, res, next){
 		var query = { _id : req.params.client_id},

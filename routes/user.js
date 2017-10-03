@@ -33,11 +33,27 @@ router
 
 		newUser.name 		= req.body.name;
 		newUser.username 	= req.body.username;
-		newUser.description = req.body.description;
 		newUser.password 	= bCrypt.hashSync(req.body.password, bCrypt.genSaltSync(10), null);
-		newUser.email 		= req.body.email;
-		newUser.admin 		= req.body.admin;
-		newUser.location 	= req.body.location;
+		
+		if(typeof req.body.description!=='undefined'){
+			newUser.email = req.body.description;
+		}
+
+		if(typeof req.body.email!=='undefined'){
+			newUser.email = req.body.email;
+		}
+
+		if(typeof req.body.admin!=='undefined'){
+			newUser.admin = req.body.admin;
+		}
+		
+		if(typeof req.body.location!=='undefined'){
+			newUser.location=req.body.location;
+		}
+
+		if(typeof req.body.avatar!=='undefined'){
+			newUser.avatar=req.body.avatar;
+		}
 
 		if(typeof req.body.role != 'undefined')
 			newUser.role.push(req.body.role);
